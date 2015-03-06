@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "IOLS Wiki";
+}
+
+<link rel="stylesheet" href="../../jquery-ui/jquery-ui.css">
+<style type="text/css">
+    #mainDiv button {
+        width: 60px;
+        margin: 1px;
+    }
+</style>
+<script src="../../jquery-ui/external/jquery/jquery.js"></script>
+<script src="../../jquery-ui/jquery-ui.js"></script>
+<script>
+    $(function () {
+        $("#btnQuery").click(function (event) {
+            var input = $("#txtKeyword").val();
+            $("#ulContainer").empty();
+            queryResult(input);
+        })
+    })
+
+    function queryResult(input) {
+        var url = '@Url.RouteUrl("DefaultActionApi", new { httproute = "", controller = "WikiRecords", action = "GetWikiRecords" })';
+        $.ajax({
+            url: url,
+            type: 'GET',
+            contentType: 'application/json',
+            data: { input: input },
+            success: function (result) {
+                $.each(result, function (key, item) {
+                    var li = buildItemLi(item);
+                    li.appendTo('#ulContainer');
+                })
+            }, error: function (xhr, textStatus, errorThrown) {
+                alert('Please retry, there is something wrong with the server.');
+            }
+        });
+    }
+
+    function buildItemLi(item) {
+        var label = $('<label/>').text(item.Name);
+        var labelDiv = $('<div/>').append(label);
+        var btnOpen = $('<button/>').text('Open').click(function (event) {
+            var url = "/Home/Detail?id=" + item.ID;
+            window.location.href = url;
+        });
+        var btnEdit = $('<button/>').text('Edit').click(function (event) {
+            var url = "/Home/Edit?id=" + item.ID;
+            window.location.href = url;
+        });;
+        var btnDiv = $('<div/>').append(btnOpen).append(btnEdit);
+
+        var li = $('<li/>').append(labelDiv).append(btnDiv);
+        return li;
+    }
+</script>
+
+<div class="jumbotron">
+    <h1>IOLS Wiki</h1>
+    <p class="lead">You can try to get the description of the IOLS, type your keyword into the textbox below. And maybe you can get what you want.</p>
+    <p class="lead">You can input multiple keywords, split by space.</p>
+</div>
+
+<div id="mainDiv" style="width: 100%; height: 100px; text-align: center; vertical-align: central; ">
+    <input type="text" id="txtKeyword" style="width: 600px; height: 30px" />
+    <input type="button" id="btnQuery" value="QUERY" style="height: 30px; " />
+</div>
+
+<div id="mainDiv">
+    <ul id="ulContainer"></ul>
+</div>

@@ -1,0 +1,168 @@
+﻿@{
+    ViewBag.Title = "Edit Wiki Record";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Wiki Record</h2>
+
+<style type="text/css">
+    input[type="text"] {
+        width: 100%;
+        border-color: ActiveBorder;
+    }
+
+    textarea {
+        width: 100%;
+        border-color: ActiveBorder;
+    }
+
+    table td {
+        height: 40px;
+        vertical-align: top;
+    }
+</style>
+
+<link rel="stylesheet" href="../../jquery-ui/jquery-ui.css">
+<script src="../../jquery-ui/external/jquery/jquery.js"></script>
+<script src="../../jquery-ui/jquery-ui.js"></script>
+<script>
+    $(function () {
+        initialData();
+
+        $("#btnSubmit").click(function (event) {
+            var name = $("#txtName").val();
+            var keyword1 = $("#txtKeyword1").val();
+            var keyword2 = $("#txtKeyword2").val();
+            var keyword3 = $("#txtKeyword3").val();
+            var description = $("#txtDescription").val();
+            var lastEditor = $("#txtLastEditor").val();
+
+            if (name == '' || keyword1 == '' || description == '' || lastEditor == '') {
+                alert("The field which is marked with * cannot be empty.");
+            }
+            else {
+                var record = {
+                    ID: '@Model',
+                    Name: name,
+                    Keyword1: keyword1,
+                    Keyword2: keyword2,
+                    Keyword3: keyword3,
+                    Description: description,
+                    LastEditor: lastEditor
+                };
+                updateRecord(record);
+            }
+        });
+
+        $("#btnCancel").click(function (event) {
+            dialog.dialog("close");
+        })
+    })
+
+    function initialData() {
+        var url = '@Url.RouteUrl("DefaultActionApi", new { httproute = "", controller = "WikiRecords", action = "GetRecordByID" })';
+        $.ajax({
+            url: url,
+            type: 'GET',
+            async: false,
+            contentType: 'application/json',
+            data: { id: '@Model' },
+            success: function (result) {
+                if (result != null) {
+                    $("#txtName").val(result.Name);
+                    $("#txtKeyword1").val(result.Keyword1);
+                    $("#txtKeyword2").val(result.Keyword2);
+                    $("#txtKeyword3").val(result.Keyword3);
+                    $("#txtDescription").text(result.Description);
+                }
+            }, error: function (xhr, textStatus, errorThrown) {
+                alert('Please retry, there is something wrong with the server.');
+            }
+        });
+    }
+
+    function alertWikiNameExisted() {
+        alert("The name is existed, please change a name then try again.");
+    }
+
+    function setNameTextBorder(color) {
+        $('#txtName').css('border-color', color);
+    }
+
+    function updateRecord(record) {
+        var url = '@Url.RouteUrl("DefaultActionApi", new { httproute = "", controller = "WikiRecords", action = "EditWikiRecord" })';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(record),
+            success: function (result) {
+                alert('Eidt Successfully.');
+                var url = "/Home/Index";
+                window.location.href = url;
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Eidt Failed');
+            }
+        });
+    }
+</script>
+
+<table>
+    <col width="100">
+    <col width="300">
+    <row height="40"></row>
+    <tr>
+        <td>
+            Name:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <input type="text" id="txtName" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Keyword1:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <input type="text" id="txtKeyword1" />
+        </td>
+    </tr>
+    <tr>
+        <td>Keyword2:</td>
+        <td>
+            <input type="text" id="txtKeyword2" />
+        </td>
+    </tr>
+    <tr>
+        <td>Keyword3:</td>
+        <td>
+            <input type="text" id="txtKeyword3" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Description:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <textarea id="txtDescription" cols="40" rows="10"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Editor:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <input type="text" id="txtLastEditor" />
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <input type="button" id="btnSubmit" value="Submit" />
+        </td>
+    </tr>
+</table>

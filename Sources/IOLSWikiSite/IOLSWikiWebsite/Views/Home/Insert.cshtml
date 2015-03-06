@@ -1,0 +1,174 @@
+﻿@{
+    ViewBag.Title = "Insert Wiki Record";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Insert Wiki Record</h2>
+
+<style type="text/css">
+    input[type="text"] {
+        width: 100%;
+        border-color: ActiveBorder;
+    }
+
+    textarea {
+        width: 100%;
+        border-color: ActiveBorder;
+    }
+
+    table td {
+        height: 40px;
+        vertical-align:top;
+    }
+</style>
+
+<link rel="stylesheet" href="../../jquery-ui/jquery-ui.css">
+<script src="../../jquery-ui/external/jquery/jquery.js"></script>
+<script src="../../jquery-ui/jquery-ui.js"></script>
+<script>
+    $(function () {
+        $("#txtName").focusout(function (event) {
+            var name = $("#txtName").val();
+            var isExisted = isWikiNameExisted(name);
+            if (isExisted) {
+                setNameTextBorder('red');
+            }
+            else {
+                setNameTextBorder('ActiveBorder');
+            }
+        })
+
+        $("#btnSubmit").click(function (event) {
+            var name = $("#txtName").val();
+            var keyword1 = $("#txtKeyword1").val();
+            var keyword2 = $("#txtKeyword2").val();
+            var keyword3 = $("#txtKeyword3").val();
+            var description = $("#txtDescription").val();
+            var author = $("#txtAuthor").val();
+
+            if (name == '' || keyword1 == '' || description == '' || author == '') {
+                alert("The field which is marked with * cannot be empty.");
+            }
+            else {
+                var isExisted = isWikiNameExisted(name);
+                if (isExisted) {
+                    alertWikiNameExisted();
+                }
+                else {
+                    var record = {
+                        Name: name,
+                        Keyword1: keyword1,
+                        Keyword2: keyword2,
+                        Keyword3: keyword3,
+                        Description: description,
+                        Author: author
+                    };
+                    addRecord(record);
+                }
+            }
+        });
+    })
+
+    function alertWikiNameExisted() {
+        alert("The name is existed, please change a name then try again.");
+    }
+
+    function setNameTextBorder(color) {
+        $('#txtName').css('border-color', color);
+    }
+
+    function isWikiNameExisted(name) {
+        var isExisted = true;
+        var url = '@Url.RouteUrl("DefaultActionApi", new { httproute = "", controller = "WikiRecords", action = "IsWikiNameExisted" })';
+        $.ajax({
+            url: url,
+            type: 'GET',
+            contentType: 'application/json',
+            async: false,
+            data: { wikiName: name },
+            success: function (result) {
+                isExisted = result;
+            }, error: function (xhr, textStatus, errorThrown) {
+                alert('Please retry, there is something wrong with the server.');
+            }
+        });
+        return isExisted;
+    }
+
+    function addRecord(record) {
+        var url = '@Url.RouteUrl("DefaultActionApi", new { httproute = "", controller = "WikiRecords", action = "AddWikiRecord" })';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(record),
+            success: function (result) {
+                alert('Add Successfully.');
+                var url = "/Home/Index";
+                window.location.href = url;
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Add Failed');
+            }
+        });
+    }
+</script>
+
+<table>
+    <col width="100">
+    <col width="300">
+    <row height="40"></row>
+    <tr>
+        <td>
+            Name:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <input type="text" id="txtName" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Keyword1:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <input type="text" id="txtKeyword1" />
+        </td>
+    </tr>
+    <tr>
+        <td>Keyword2:</td>
+        <td>
+            <input type="text" id="txtKeyword2" />
+        </td>
+    </tr>
+    <tr>
+        <td>Keyword3:</td>
+        <td>
+            <input type="text" id="txtKeyword3" />
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Description:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <textarea id="txtDescription" cols="40" rows="10"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Author:
+            <label style="color: red">*</label>
+        </td>
+        <td>
+            <input type="text" id="txtAuthor" />
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <input type="button" id="btnSubmit" value="Submit" />
+        </td>
+    </tr>
+</table>

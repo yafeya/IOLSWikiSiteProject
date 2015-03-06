@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="../../jquery-ui/external/jquery/jquery.js"></script>
+<script src="../../jquery-ui/jquery-ui.js"></script>
+<script>
+    $(function () {
+        var url = '@Url.RouteUrl("DefaultActionApi", new { httproute = "", controller = "WikiRecords", action = "GetRecordByID" })';
+        $.ajax({
+            url: url,
+            type: 'GET',
+            contentType: 'application/json',
+            data: { id: '@Model' },
+            success: function (result) {
+                if (result != null) {
+                    $("#lbName").text(result.Name);
+                    $("#lbDescription").text(result.Description);
+                    var misc = "Create by " + result.Author + ", at " + result.CreationTime + ". Last modify by " + result.LastEditor + ", at " + result.LastModificationTime;
+                    $("#lbMisc").text(misc);
+                }
+            }, error: function (xhr, textStatus, errorThrown) {
+                alert('Please retry, there is something wrong with the server.');
+            }
+        });
+    })
+
+</script>
+
+<div id="mainDiv">
+    <div id="divName">
+        <label id="lbName" style="font-size:xx-large; font-weight:600" />
+    </div>
+    <div id="divMisc">
+        <label id="lbMisc" style="font-size: smaller; font-style: italic; color: gray" />
+    </div>
+    <div id="divDescription">
+        <label id="lbDescription" style="font-size: larger; font-weight: 400" />
+    </div>
+</div>
